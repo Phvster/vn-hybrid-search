@@ -14,8 +14,8 @@
         │ download        │   corpus.parquet ──┬─► syllable tokenize ─► bm25_syllable/ (R0)
         ▼                 │                    ├─► pyvi segment ──────► bm25_word/     (R1)
    data/raw/  ─► prepare ─┤                    └─► [Kaggle GPU] bge-m3 ─► embeddings.npy
-                (NFC,     │   queries.parquet, qrels.tsv                + dense.faiss (R2)
-                 dedupe)  │   split.json (dev/test, fixed seed)         + doc_ids.json
+                (NFC,     │   queries.parquet, qrels.tsv                + doc_ids.json (R2)
+                 dedupe)  │   split.json (dev/test, fixed seed)         + meta.json
                           └──────────────────────────────────────────────────────────┘
                          ┌──────────────── ONLINE ─────────────────────────────────┐
   query ─► normalize ─►  │ R0/R1: BM25 │ R2: encode + FAISS │ R3: RRF(R1,R2) │ R4: rerank
@@ -63,8 +63,11 @@
 | `data/processed/qrels.tsv` | TSV | `qid, doc_id, rel` |
 | `data/processed/split.json` | JSON | dev/test `qid` lists + seed |
 | `artifacts/bm25_{syllable,word}/` | bm25s index dir | plus tokenizer metadata |
-| `artifacts/dense/embeddings.npy` | NumPy fp16 | row *i* ↔ `doc_ids.json[i]` |
-| `artifacts/dense/dense.faiss`, `doc_ids.json` | FAISS, JSON | plus model name and `max_seq_length` metadata |
+| `artifacts/dense/embeddings.npy` | NumPy fp16, L2-normalized | row *i* ↔ `doc_ids.json[i]` (corpus order) |
+| `artifacts/dense/doc_ids.json`, `meta.json` | JSON | model, revision, `max_seq_length`, library versions, GPU |
+| `artifacts/dense/local_check.json` | JSON | cosine between local CPU and Kaggle vectors for a sample (must be ≥ 0.99) |
+
+The FAISS `IndexFlatIP` is rebuilt from `embeddings.npy` at load time (under 1 s), so no index file can drift out of sync with the vectors.
 | `results/runs/{config}_{split}.json` | ranx Run | `qid → {doc_id: score}` (gitignored) |
 | `results/metrics_{split}.csv` | CSV | one row per config, plus commit hash (committed) |
 

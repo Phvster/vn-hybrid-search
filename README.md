@@ -66,6 +66,9 @@ uv run python scripts/prepare_data.py   # download (pinned revision), clean, val
 uv run python scripts/eda.py            # writes results/eda_report.md
 uv run python scripts/sanity_check.py   # random ranking ≈ 0, oracle ranking = 1 on dev
 uv run python scripts/build_bm25.py     # R0 + R1 indexes -> artifacts/
+# R2: encode the corpus with notebooks/02_encode_kaggle.ipynb on a Kaggle GPU,
+#     put its output in artifacts/dense/, then:
+uv run python scripts/verify_dense.py   # alignment + local-vs-Kaggle cosine check
 uv run python scripts/evaluate.py r1 --split dev   # run, metrics, latency -> results/
 uv run python scripts/compare.py --split dev       # paired significance tests
 ```

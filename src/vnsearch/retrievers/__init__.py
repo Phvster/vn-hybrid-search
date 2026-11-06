@@ -8,6 +8,10 @@ def load_retriever(cfg: dict) -> Retriever:
         from vnsearch.retrievers.bm25 import BM25Retriever
 
         return BM25Retriever.load(ARTIFACTS_DIR / cfg["index"])
+    if cfg["type"] == "dense":
+        from vnsearch.retrievers.dense import DenseRetriever
+
+        return DenseRetriever.load(ARTIFACTS_DIR / cfg["index"], cfg)
     raise ValueError(f"Unknown retriever type: {cfg['type']}")
 
 
