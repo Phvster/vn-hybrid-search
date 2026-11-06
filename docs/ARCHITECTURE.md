@@ -51,7 +51,7 @@
 ### Key processing rules
 
 - **Normalization.** Every branch applies Unicode NFC, because the same Vietnamese character can be encoded in several ways. Only the BM25 branches lowercase. The dense model gets cased text, since its tokenizer was trained on cased text.
-- **Retrieval unit = article (Điều).** `doc_id` is the source id, kept unchanged to avoid mapping bugs: `"{law_id}+{article_id}"`, e.g. `01/2009/tt-bnn+1`. If EDA shows long articles must be chunked, every chunk keeps its parent `doc_id`, and retrievers aggregate chunks to articles (max score) **before** returning results.
+- **Retrieval unit = article (Điều).** `doc_id` is the source id, kept unchanged to avoid mapping bugs: `"{law_id}+{article_id}"`, e.g. `01/2009/tt-bnn+1`. The EDA showed chunking is not needed: 98% of relevant articles fit in bge-m3's `max_seq_length = 2048`. If chunking is added later, every chunk keeps its parent `doc_id`, and retrievers aggregate chunks to articles (max score) **before** returning results.
 - **Hybrid.** RRF over the top-100 of R1 and R2: `score(d) = Σ 1 / (k + rank_i(d))`. `k` is tuned on dev (see the experiment protocol).
 
 ## Artifacts

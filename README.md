@@ -63,6 +63,7 @@ uv sync --all-groups
 cp .env.example .env      # add ANTHROPIC_API_KEY (only needed for answer generation)
 uv run pytest
 uv run python scripts/prepare_data.py   # download (pinned revision), clean, validate, split
+uv run python scripts/eda.py            # writes results/eda_report.md
 ```
 
 *Indexing and evaluation commands will be added as they are implemented.*
@@ -73,7 +74,8 @@ uv run python scripts/prepare_data.py   # download (pinned revision), clean, val
 configs/          experiment configs (one YAML per run)
 src/vnsearch/     library code: data, text processing, retrievers, evaluation, generation
 scripts/          CLI entry points
-notebooks/        EDA, Kaggle encoding, error analysis
+notebooks/        Kaggle encoding, error analysis
+results/          EDA report and metric tables
 app/              Gradio demo
 tests/            unit and integration tests
 docs/             architecture and experiment protocol

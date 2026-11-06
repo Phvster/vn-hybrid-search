@@ -25,8 +25,9 @@ Which retrieval configuration (R0–R3, optionally R4) gives the best retrieval 
 - Every retriever indexes the same `contents` field: article title + body. 357 articles have an empty body and would be unfindable without the title. None of them is a labeled answer.
 - 1,272 articles share their body text with another article. They are kept, because labels point to ids. Ties are broken deterministically by `doc_id`.
 - Every branch applies Unicode NFC. BM25 branches also lowercase. Dense input keeps its original case.
-- R0 tokenizes by whitespace (syllables). R1 segments words with pyvi.
-- Chunking is decided after EDA. If used, results are aggregated to article level (max score) before evaluation.
+- R0 tokenizes by whitespace (syllables). R1 segments words with pyvi **on cased text, then lowercases**. In the EDA, segmenting cased text kept proper-noun compounds such as `việt_nam` and `luật_chứng_khoán`, which lowercase-first segmentation split apart (16% of sampled texts differ).
+- **No chunking. bge-m3 uses `max_seq_length = 2048`.** From the EDA ([results/eda_report.md](../results/eda_report.md)): 98.0% of relevant articles (99.1% of all articles) fit in 2,048 tokens. The rest keep their first 2,048 tokens, which include the title. Going to 8,192 would add ~1.8 points of coverage at roughly quadratic attention cost. Chunking would add an aggregation step for a small gain.
+- Capitalized "Điều" in mid-sentence (e.g. "đê Điều") is **not** corrected. It mixes a real artifact with legitimate legal style ("tại Điều này"), BM25 lowercases anyway, and a regex fix risks corrupting valid text.
 
 ## Configurations
 
@@ -34,7 +35,7 @@ Which retrieval configuration (R0–R3, optionally R4) gives the best retrieval 
 |---|---|---|
 | R0 | BM25 (bm25s), syllable tokens | – (library defaults `k1=1.5`, `b=0.75`) |
 | R1 | BM25 (bm25s), pyvi word tokens | – (same defaults) |
-| R2 | bge-m3 dense embeddings, cosine similarity via FAISS `IndexFlatIP` (exact) | `max_seq_length` is chosen from EDA, not tuned |
+| R2 | bge-m3 dense embeddings, cosine similarity via FAISS `IndexFlatIP` (exact), `max_seq_length = 2048` | – |
 | R3 | RRF of R1 and R2, top-100 from each | `k ∈ {10, 30, 60, 100}` |
 | R4 *(stretch)* | bge-reranker-v2-m3 over R3's top-N | `N ∈ {20, 50}` |
 
@@ -86,6 +87,8 @@ Per-question comparison of R1, R2 and R3 on test. Sample about 30 questions wher
 
 - Incomplete labels lower absolute scores, so focus on the relative comparison.
 - Only 93 questions in the whole dataset (40 in dev, 53 in test) have more than one relevant article. Multi-relevant behaviour (Recall vs Hit) is reported descriptively, not as a significance claim.
+- BM25 sees every article in full, while R2 truncates the 2% of relevant articles longer than 2,048 tokens. This slightly favours BM25 and is reported.
+- Query–answer syllable overlap is high (80% vs 26% for a random article), so the dataset is lexically friendly and BM25 is expected to be a strong baseline.
 - The dense model may have seen similar public legal text during pretraining. No evidence of Zalo data in its published fine-tuning sets.
 - Latency depends on hardware, so it is compared only within the same machine.
 

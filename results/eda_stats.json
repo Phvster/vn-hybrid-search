@@ -1,0 +1,114 @@
+{
+  "tokens": {
+    "tokens_per_syllable": 1.1456988328811168,
+    "total_doc_tokens": 21198374,
+    "all_articles": {
+      "median": 225.0,
+      "p90": 694.0,
+      "p95": 947.7999999999956,
+      "p99": 1935.760000000002,
+      "max": 67397
+    },
+    "relevant_articles": {
+      "median": 243.5,
+      "p90": 916.8000000000002,
+      "p95": 1270.249999999999,
+      "p99": 2601.140000000006,
+      "max": 67397
+    },
+    "coverage_all": {
+      "256": 0.5587138787138787,
+      "512": 0.8243060643060643,
+      "1024": 0.9583557183557183,
+      "2048": 0.9914367114367114,
+      "4096": 0.9978835978835979,
+      "8192": 0.9995929995929996
+    },
+    "coverage_relevant": {
+      "256": 0.5188172043010753,
+      "512": 0.7419354838709677,
+      "1024": 0.9198028673835126,
+      "2048": 0.9802867383512545,
+      "4096": 0.9946236559139785,
+      "8192": 0.9986559139784946
+    },
+    "queries": {
+      "median": 23.0,
+      "p90": 32.0,
+      "p95": 35.0,
+      "p99": 40.0,
+      "max": 47
+    }
+  },
+  "overlap": {
+    "relevant_mean": 0.7967852743249522,
+    "random_mean": 0.26267337377170374
+  },
+  "lowercase": {
+    "texts_compared": 4000,
+    "texts_with_different_tokens": 640,
+    "share_different": 0.16,
+    "pyvi_seconds_per_1000_articles": 3.48076089999995,
+    "estimated_corpus_minutes": 3.563428971374949,
+    "examples": [
+      {
+        "text": "Điều 40. Tẩy xạ\n1. Có dụng cụ, hóa chất và vật liệu tẩy xạ.\n2. Đáp ứng các điều kiện quy định tại Điều 39 của Nghị định ",
+        "cased_first": [
+          "tẩy_xạ"
+        ],
+        "lower_first": []
+      },
+      {
+        "text": "Điều 143 được sửa đổi như sau:\na) Sửa đổi khoản 3 như sau:\n“3. Giấy phép xuất khẩu, nhập khẩu thuốc, nguyên liệu làm thu",
+        "cased_first": [
+          "vi.",
+          "vii."
+        ],
+        "lower_first": [
+          "nam",
+          "vi",
+          "vii",
+          "việt"
+        ]
+      },
+      {
+        "text": "Điều 17. Thẩm quyền hạn chế hoặc tạm dừng các hoạt động qua lại biên giới tại cửa khẩu biên giới\nTrường hợp vì lý do quố",
+        "cased_first": [
+          "việt_nam"
+        ],
+        "lower_first": [
+          "nam",
+          "việt"
+        ]
+      },
+      {
+        "text": "Điều 24. Nghĩa vụ về cung cấp thông tin và giải trình theo yêu cầu của các tổ chức và cá nhân tham gia giao dịch chứng k",
+        "cased_first": [
+          "luật_chứng_khoán"
+        ],
+        "lower_first": []
+      },
+      {
+        "text": "Điều 18. Thông báo về việc giảm thời hạn chấp hành án phạt tù, đặc xá, đại xá cho người đang chấp hành án phạt tù đã đượ",
+        "cased_first": [],
+        "lower_first": [
+          "nam",
+          "việt"
+        ]
+      }
+    ]
+  },
+  "dieu": {
+    "articles_affected": 3385,
+    "occurrences": 6870,
+    "queries_affected": 3,
+    "examples": [
+      " hướng dẫn tuần tra, canh gác bảo vệ đê Điều trong mùa lũ đối vớ",
+      " vụ của cơ quan chuyên trách quản lý đê Điều. 2. Tuần tra, canh ",
+      "ng cụ, sổ sách quy định tại khoản 2 của Điều này lấy trong quỹ p",
+      " cố nguy hiểm đe dọa đến an toàn của đê Điều, cần phải huy động ",
+      "ịnh chế độ tuần tra, canh gác bảo vệ đê Điều 1. Báo động lũ ở cấ",
+      "đội phó, cán bộ chuyên trách quản lý đê Điều và Ban Chỉ huy phòn"
+    ]
+  }
+}
