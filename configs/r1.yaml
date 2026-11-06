@@ -1,0 +1,7 @@
+# R1: BM25 over pyvi-segmented words (segment cased text, then lowercase)
+name: r1
+type: bm25
+tokenizer: word
+index: bm25_word
+k1: 1.5
+b: 0.75

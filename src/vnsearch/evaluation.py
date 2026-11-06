@@ -1,6 +1,8 @@
 """Run retrievers, score them with ranx, benchmark latency and record results."""
 
 import json
+import os
+import platform
 import subprocess
 import time
 from datetime import UTC, datetime
@@ -26,6 +28,12 @@ METRICS = [
     "ndcg@10",
 ]
 RUN_DEPTH = 100  # results kept per query; also the fusion depth for R3
+
+# docs/EXPERIMENT_PROTOCOL.md: planned comparisons (system, baseline), Bonferroni-corrected.
+PLANNED_COMPARISONS = [("r1", "r0"), ("r2", "r1"), ("r3", "r1"), ("r3", "r2")]
+ALPHA = 0.05
+SIGNIFICANCE_METRICS = ["ndcg@10", "recall@10"]
+N_PERMUTATIONS = 10_000
 
 Run = dict[str, list[Hit]]
 
@@ -80,6 +88,51 @@ def evaluate(run: Run, qrels: pd.DataFrame, metrics: list[str] = METRICS) -> dic
     if not isinstance(scores, dict):  # ranx returns a bare number for a single metric
         scores = {metrics[0]: scores}
     return {m: float(scores[m]) for m in metrics}
+
+
+def paired_test(
+    system: tuple[str, Run],
+    baseline: tuple[str, Run],
+    qrels: pd.DataFrame,
+    metrics: list[str] = SIGNIFICANCE_METRICS,
+    n_comparisons: int = len(PLANNED_COMPARISONS),
+) -> list[dict]:
+    """Two-sided paired randomization test (Fisher) per metric, Bonferroni-corrected."""
+    (sys_name, sys_run), (base_name, base_run) = system, baseline
+    if set(sys_run) != set(base_run):
+        raise ValueError("Runs must cover the same queries for a paired test")
+    alpha = ALPHA / n_comparisons
+    report = ranx.compare(
+        to_ranx_qrels(qrels, sys_run.keys()),
+        [to_ranx_run(sys_run, sys_name), to_ranx_run(base_run, base_name)],
+        metrics,
+        stat_test="fisher",
+        n_permutations=N_PERMUTATIONS,
+        rounding_digits=6,
+        make_comparable=True,
+    ).to_dict()
+    rows = []
+    for m in metrics:
+        wtl = report[sys_name]["win_tie_loss"][base_name][m]
+        p_value = report[sys_name]["comparisons"][base_name][m]
+        sys_mean, base_mean = report[sys_name]["scores"][m], report[base_name]["scores"][m]
+        rows.append(
+            {
+                "system": sys_name,
+                "baseline": base_name,
+                "metric": m,
+                "system_mean": sys_mean,
+                "baseline_mean": base_mean,
+                "delta": sys_mean - base_mean,
+                "p_value": p_value,
+                "alpha_corrected": alpha,
+                "significant": p_value < alpha,
+                "wins": wtl["W"],
+                "ties": wtl["T"],
+                "losses": wtl["L"],
+            }
+        )
+    return rows
 
 
 def random_run(qids, doc_ids, k: int = RUN_DEPTH, seed: int = 0) -> Run:
@@ -140,7 +193,11 @@ def record_metrics(
     """Insert or replace the row for (config, split) in results/metrics_{split}.csv."""
     path = RESULTS_DIR / f"metrics_{split}.csv"
     row = {"config": config, "split": split, **scores, **(latency or {})}
-    row |= {"commit": git_commit(), "timestamp": datetime.now(UTC).isoformat(timespec="seconds")}
+    row |= {
+        "hardware": f"{platform.processor()} ({os.cpu_count()} threads)",
+        "commit": git_commit(),
+        "timestamp": datetime.now(UTC).isoformat(timespec="seconds"),
+    }
     table = pd.read_csv(path) if path.exists() else pd.DataFrame()
     if not table.empty:
         table = table[table["config"] != config]

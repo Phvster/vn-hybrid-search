@@ -65,6 +65,9 @@ uv run pytest
 uv run python scripts/prepare_data.py   # download (pinned revision), clean, validate, split
 uv run python scripts/eda.py            # writes results/eda_report.md
 uv run python scripts/sanity_check.py   # random ranking ≈ 0, oracle ranking = 1 on dev
+uv run python scripts/build_bm25.py     # R0 + R1 indexes -> artifacts/
+uv run python scripts/evaluate.py r1 --split dev   # run, metrics, latency -> results/
+uv run python scripts/compare.py --split dev       # paired significance tests
 ```
 
 *Indexing and evaluation commands will be added as they are implemented.*

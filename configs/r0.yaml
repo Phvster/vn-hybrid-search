@@ -1,0 +1,7 @@
+# R0: BM25 over lowercase syllables (whitespace tokens, punctuation removed)
+name: r0
+type: bm25
+tokenizer: syllable
+index: bm25_syllable
+k1: 1.5
+b: 0.75

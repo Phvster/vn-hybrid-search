@@ -82,6 +82,24 @@ def test_oracle_and_random_runs():
     assert random["recall@10"] < 0.05
 
 
+def test_paired_test_reports_bonferroni_corrected_result():
+    qids = [f"q{i}" for i in range(40)]
+    qrels = qrels_for({q: [f"rel_{q}"] for q in qids})
+    good = {q: ranking(f"rel_{q}", "x") for q in qids}
+    bad = {q: ranking("x", f"rel_{q}") for q in qids}
+    rows = evaluation.paired_test(("good", good), ("bad", bad), qrels, ["mrr@10"], n_comparisons=4)
+    (row,) = rows
+    assert row["system_mean"] == 1.0 and row["baseline_mean"] == 0.5
+    assert row["alpha_corrected"] == pytest.approx(0.0125)
+    assert row["significant"] and row["wins"] == 40
+
+
+def test_paired_test_rejects_runs_on_different_queries():
+    qrels = qrels_for({"q1": ["A"], "q2": ["B"]})
+    with pytest.raises(ValueError):
+        evaluation.paired_test(("a", {"q1": []}), ("b", {"q2": []}), qrels)
+
+
 def test_run_round_trip(tmp_path):
     run = {"q": [Hit("01/2009/tt-bnn+1", 2.5), Hit("x+2", 1.0)]}
     path = tmp_path / "runs" / "r.json"
