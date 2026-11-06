@@ -62,9 +62,10 @@ git clone <this-repo> && cd vn-hybrid-search
 uv sync --all-groups
 cp .env.example .env      # add ANTHROPIC_API_KEY (only needed for answer generation)
 uv run pytest
+uv run python scripts/prepare_data.py   # download (pinned revision), clean, validate, split
 ```
 
-*Data preparation, indexing and evaluation commands will be added as they are implemented.*
+*Indexing and evaluation commands will be added as they are implemented.*
 
 ## Project structure
 

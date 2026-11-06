@@ -22,6 +22,8 @@ Which retrieval configuration (R0–R3, optionally R4) gives the best retrieval 
 
 ## Preprocessing
 
+- Every retriever indexes the same `contents` field: article title + body. 357 articles have an empty body and would be unfindable without the title. None of them is a labeled answer.
+- 1,272 articles share their body text with another article. They are kept, because labels point to ids. Ties are broken deterministically by `doc_id`.
 - Every branch applies Unicode NFC. BM25 branches also lowercase. Dense input keeps its original case.
 - R0 tokenizes by whitespace (syllables). R1 segments words with pyvi.
 - Chunking is decided after EDA. If used, results are aggregated to article level (max score) before evaluation.
@@ -83,7 +85,7 @@ Per-question comparison of R1, R2 and R3 on test. Sample about 30 questions wher
 ## Threats to validity
 
 - Incomplete labels lower absolute scores, so focus on the relative comparison.
-- Only 93 questions in the whole dataset (about 65 expected in test) have more than one relevant article. Multi-relevant behaviour (Recall vs Hit) is reported descriptively, not as a significance claim.
+- Only 93 questions in the whole dataset (40 in dev, 53 in test) have more than one relevant article. Multi-relevant behaviour (Recall vs Hit) is reported descriptively, not as a significance claim.
 - The dense model may have seen similar public legal text during pretraining. No evidence of Zalo data in its published fine-tuning sets.
 - Latency depends on hardware, so it is compared only within the same machine.
 
