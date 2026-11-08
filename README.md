@@ -71,6 +71,8 @@ uv run python scripts/build_bm25.py     # R0 + R1 indexes -> artifacts/
 uv run python scripts/verify_dense.py   # alignment + local-vs-Kaggle cosine check
 uv run python scripts/evaluate.py r1 --split dev   # run, metrics, latency -> results/
 uv run python scripts/compare.py --split dev       # paired significance tests
+uv run python scripts/tune_rrf.py                  # RRF k on dev (from saved runs)
+uv run python app/app.py                           # Gradio demo at http://127.0.0.1:7860
 ```
 
 *Indexing and evaluation commands will be added as they are implemented.*
