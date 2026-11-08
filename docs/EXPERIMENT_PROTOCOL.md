@@ -93,6 +93,7 @@ Per-question comparison of R1, R2 and R3 on test. Sample about 30 questions wher
 - Query–answer syllable overlap is high (80% vs 26% for a random article), so the dataset is lexically friendly and BM25 is expected to be a strong baseline.
 - The dense model may have seen similar public legal text during pretraining. No evidence of Zalo data in its published fine-tuning sets.
 - Latency depends on hardware, so it is compared only within the same machine.
+- The tuned RRF constant (`k = 10`) lies at the lower edge of the pre-registered grid {10, 30, 60, 100}; a smaller `k` might score slightly higher. The grid was deliberately **not** extended after seeing results (gain from 30 → 10 was only +0.004 nDCG@10 on dev).
 
 ## Deviations
 
