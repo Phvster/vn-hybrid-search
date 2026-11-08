@@ -4,4 +4,4 @@ name: r3
 type: hybrid
 components: [r1, r2]
 depth: 100
-rrf_k: 60
+rrf_k: 10  # tuned on dev: results/rrf_tuning_dev.csv
