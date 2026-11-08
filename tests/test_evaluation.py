@@ -87,10 +87,10 @@ def test_paired_test_reports_bonferroni_corrected_result():
     qrels = qrels_for({q: [f"rel_{q}"] for q in qids})
     good = {q: ranking(f"rel_{q}", "x") for q in qids}
     bad = {q: ranking("x", f"rel_{q}") for q in qids}
-    rows = evaluation.paired_test(("good", good), ("bad", bad), qrels, ["mrr@10"], n_comparisons=4)
+    rows = evaluation.paired_test(("good", good), ("bad", bad), qrels, ["mrr@10"])
     (row,) = rows
     assert row["system_mean"] == 1.0 and row["baseline_mean"] == 0.5
-    assert row["alpha_corrected"] == pytest.approx(0.0125)
+    assert row["alpha_corrected"] == pytest.approx(0.05 / 5)  # 5 planned comparisons
     assert row["significant"] and row["wins"] == 40
 
 

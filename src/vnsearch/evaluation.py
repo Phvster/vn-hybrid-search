@@ -30,7 +30,7 @@ METRICS = [
 RUN_DEPTH = 100  # results kept per query; also the fusion depth for R3
 
 # docs/EXPERIMENT_PROTOCOL.md: planned comparisons (system, baseline), Bonferroni-corrected.
-PLANNED_COMPARISONS = [("r1", "r0"), ("r2", "r1"), ("r3", "r1"), ("r3", "r2")]
+PLANNED_COMPARISONS = [("r1", "r0"), ("r2", "r1"), ("r3", "r1"), ("r3", "r2"), ("r4", "r3")]
 ALPHA = 0.05
 SIGNIFICANCE_METRICS = ["ndcg@10", "recall@10"]
 N_PERMUTATIONS = 10_000
