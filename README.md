@@ -72,6 +72,10 @@ uv run python scripts/verify_dense.py   # alignment + local-vs-Kaggle cosine che
 uv run python scripts/evaluate.py r1 --split dev   # run, metrics, latency -> results/
 uv run python scripts/compare.py --split dev       # paired significance tests
 uv run python scripts/tune_rrf.py                  # RRF k on dev (from saved runs)
+# R4: export R3 candidates, score them with notebooks/03_rerank_kaggle.ipynb on a Kaggle GPU,
+#     put its output in artifacts/rerank/, then:
+uv run python scripts/export_rerank_candidates.py --split dev
+uv run python scripts/evaluate_rerank.py --tune    # choose n on dev; drop --tune to record
 uv run python app/app.py                           # Gradio demo at http://127.0.0.1:7860
 ```
 

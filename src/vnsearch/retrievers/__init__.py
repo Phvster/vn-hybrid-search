@@ -18,6 +18,16 @@ def load_retriever(cfg: dict) -> Retriever:
 
         components = [load_retriever(load_config(name)) for name in cfg["components"]]
         return HybridRetriever(cfg["name"], components, k=cfg["rrf_k"], depth=cfg["depth"])
+    if cfg["type"] == "rerank":
+        from vnsearch import data
+        from vnsearch.config import load_config
+        from vnsearch.retrievers.rerank import RerankRetriever, load_cross_encoder
+
+        contents = data.load_corpus().set_index("doc_id")["contents"]
+        base = load_retriever(load_config(cfg["base"]))
+        return RerankRetriever(
+            cfg["name"], base, load_cross_encoder(cfg), contents, cfg["n"], cfg["batch_size"]
+        )
     raise ValueError(f"Unknown retriever type: {cfg['type']}")
 
 

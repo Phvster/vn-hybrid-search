@@ -37,7 +37,7 @@ Which retrieval configuration (R0–R3, optionally R4) gives the best retrieval 
 | R1 | BM25 (bm25s), pyvi word tokens | – (same defaults) |
 | R2 | bge-m3 dense embeddings, cosine similarity via FAISS `IndexFlatIP` (exact), `max_seq_length = 2048` | – |
 | R3 | RRF of R1 and R2, top-100 from each | `k ∈ {10, 30, 60, 100}` |
-| R4 *(stretch)* | bge-reranker-v2-m3 over R3's top-N | `N ∈ {20, 50}` |
+| R4 *(stretch)* | bge-reranker-v2-m3 (`max_length = 512`) re-ranks R3's top-N; ranks N+1…100 keep R3's order | `N ∈ {20, 50}` |
 
 If R0 beats R1 on dev, R3 fuses R0 instead, and this is reported as a deviation. (Dev result: R1 beat R0, so R3 fuses R1 and R2 as planned.)
 
@@ -97,4 +97,11 @@ Per-question comparison of R1, R2 and R3 on test. Sample about 30 questions wher
 
 ## Deviations
 
-*None yet.*
+1. **R4 reranker scores are computed on a Kaggle GPU; R4 latency is measured on a CPU sample.** *(Logged 2026-11-08, before any R4 quality result.)*
+   - Reason: on the benchmark laptop CPU (6 threads), `bge-reranker-v2-m3` with `max_length = 512` takes about **25 s per query** for N = 20. Full dev and test runs would take about 22 hours.
+   - What changes:
+     - Reranker scores for R3's top-50 are computed on a Kaggle T4 GPU (fp16) and applied locally by the same `apply_rerank` function the online retriever uses.
+     - A CPU cross-check on 2 queries × 20 candidates must reproduce the GPU ranking.
+     - R4 latency is reported on a fixed sample of 30 queries on the benchmark CPU (with GPU latency as supplementary information), instead of every query.
+   - What does not change: the selection rule, the test-once rule, and the metrics.
+   - `max_length = 512` is fixed for cost reasons before quality is seen. R4 is not part of the demo.

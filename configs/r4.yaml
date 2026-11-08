@@ -1,0 +1,12 @@
+# R4: bge-reranker-v2-m3 re-ranks R3's top-N (scores computed on Kaggle GPU, see the
+# Deviations section of the experiment protocol). n is tuned on dev in {20, 50}.
+name: r4
+type: rerank
+base: r3
+model: BAAI/bge-reranker-v2-m3
+revision: 953dc6f6f85a1b2dbfca4c34a2796e7dde08d41e
+max_length: 512
+n: 20
+scored_depth: 50  # candidates scored on Kaggle (largest n in the grid)
+torch_threads: 6
+batch_size: 20
