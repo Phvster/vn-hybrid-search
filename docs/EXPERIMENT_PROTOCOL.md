@@ -39,7 +39,9 @@ Which retrieval configuration (R0–R3, optionally R4) gives the best retrieval 
 | R3 | RRF of R1 and R2, top-100 from each | `k ∈ {10, 30, 60, 100}` |
 | R4 *(stretch)* | bge-reranker-v2-m3 over R3's top-N | `N ∈ {20, 50}` |
 
-If R0 beats R1 on dev, R3 fuses R0 instead, and this is reported as a deviation.
+If R0 beats R1 on dev, R3 fuses R0 instead, and this is reported as a deviation. (Dev result: R1 beat R0, so R3 fuses R1 and R2 as planned.)
+
+**Selection rule for tuned values (fixed before tuning):** pick the value with the highest **dev nDCG@10**. If two values are within 0.001, prefer the default (`k = 60` for RRF, `N = 20` for R4). Tuning reuses the saved dev runs; the chosen value is then re-run through the real retriever and must reproduce the tuning score exactly.
 
 ## Metrics
 

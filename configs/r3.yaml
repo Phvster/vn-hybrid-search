@@ -1,0 +1,7 @@
+# R3: Reciprocal Rank Fusion of R1 (BM25 words) and R2 (bge-m3), top-100 from each.
+# rrf_k is set from scripts/tune_rrf.py on dev (selection rule in the experiment protocol).
+name: r3
+type: hybrid
+components: [r1, r2]
+depth: 100
+rrf_k: 60

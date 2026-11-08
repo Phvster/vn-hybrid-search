@@ -12,6 +12,12 @@ def load_retriever(cfg: dict) -> Retriever:
         from vnsearch.retrievers.dense import DenseRetriever
 
         return DenseRetriever.load(ARTIFACTS_DIR / cfg["index"], cfg)
+    if cfg["type"] == "hybrid":
+        from vnsearch.config import load_config
+        from vnsearch.retrievers.hybrid import HybridRetriever
+
+        components = [load_retriever(load_config(name)) for name in cfg["components"]]
+        return HybridRetriever(cfg["name"], components, k=cfg["rrf_k"], depth=cfg["depth"])
     raise ValueError(f"Unknown retriever type: {cfg['type']}")
 
 
