@@ -34,8 +34,9 @@ def load_scores(cfg: dict, split: str, base_run: evaluation.Run) -> dict[str, di
     scores: dict[str, dict[str, float]] = {}
     for qid, doc_id, score in table[["qid", "doc_id", "score"]].itertuples(index=False):
         scores.setdefault(qid, {})[doc_id] = float(score)
+    depth = cfg["scored_depth"] if split == "dev" else cfg["n"]  # test scores only the frozen n
     for qid, hits in base_run.items():
-        missing = {h.doc_id for h in hits[: cfg["scored_depth"]]} - set(scores.get(qid, {}))
+        missing = {h.doc_id for h in hits[:depth]} - set(scores.get(qid, {}))
         if missing:
             raise ValueError(f"Query {qid}: {len(missing)} candidates have no reranker score")
     print(f"scores: {len(table):,} pairs, GPU {meta.get('gpu')}, {meta.get('seconds', 0):.0f} s")

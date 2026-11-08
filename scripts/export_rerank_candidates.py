@@ -12,6 +12,11 @@ from vnsearch import evaluation
 from vnsearch.config import ARTIFACTS_DIR, RESULTS_DIR, load_config
 
 
+def scored_depth(cfg: dict, split: str) -> int:
+    """Dev scores the whole tuning grid; test only needs the frozen n."""
+    return cfg["scored_depth"] if split == "dev" else cfg["n"]
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--split", default="dev", choices=["dev", "test"])
@@ -22,10 +27,11 @@ def main() -> None:
     queries = evaluation.split_queries(args.split, allow_test=args.allow_test)
     run = evaluation.load_run(RESULTS_DIR / "runs" / f"{cfg['base']}_{args.split}.json")
     text = queries.set_index("qid")["text"]
+    depth = scored_depth(cfg, args.split)
     rows = [
         (qid, text[qid], hit.doc_id, rank)
         for qid in queries["qid"]
-        for rank, hit in enumerate(run[qid][: cfg["scored_depth"]], start=1)
+        for rank, hit in enumerate(run[qid][:depth], start=1)
     ]
     table = pd.DataFrame(rows, columns=["qid", "query", "doc_id", "rank"])
     out = ARTIFACTS_DIR / "rerank" / f"candidates_{args.split}.parquet"
