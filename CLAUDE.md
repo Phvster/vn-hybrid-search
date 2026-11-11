@@ -40,3 +40,5 @@ uv run ruff format .      # format
 On this machine `uv` is installed via pip, so call it as `py -3.13 -m uv ...` if `uv` is not on PATH (plain `py` resolves to the project venv when it is activated, and the venv has no `uv`).
 
 Workflow for results: commit code first, then run evaluation (so metrics carry a clean commit hash), then commit `results/`.
+
+Remote: `origin` = https://github.com/Phvster/vn-hybrid-search (private until the final README is done). Push `main` after each step's commits.
