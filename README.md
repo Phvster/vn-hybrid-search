@@ -2,7 +2,9 @@
 
 **An empirical comparison of lexical, dense, and hybrid retrieval for Vietnamese legal text, packaged as the retrieval layer of a RAG system.**
 
-> Status: 🚧 in progress. Results and demo links will be added once experiments are run.
+> Status: experiments complete (test split evaluated once). Public demo: 🚧 in progress.
+
+**TL;DR (held-out test, 2,237 questions):** Vietnamese word segmentation improves BM25 (+0.026 nDCG@10). Dense bge-m3 beats it (+0.056). **Hybrid RRF is best within a CPU budget: nDCG@10 0.753, Hit@10 0.920 at ~0.2 s/query.** A cross-encoder reranker pushes nDCG@10 to 0.792 (Recall@1 +8.3 points) but costs ~24 s/query on CPU. Every planned comparison is significant (p < 0.0001), except that the reranker does not change Recall@10.
 
 ## Why this project
 
@@ -32,14 +34,44 @@ Recall@{1,5,10,20}, Hit@{1,5,10}, MRR@10, nDCG@10, and query latency (p50/p95, C
 
 ## Results
 
-*To be filled after the test run.*
+Held-out **test split, 2,237 questions, evaluated once** after every setting was frozen on dev. Latency is per query on a laptop CPU (Intel, 12 threads, torch fixed at 6), measured sequentially after warm-up.
 
-| Config | Recall@5 | Recall@10 | Hit@10 | MRR@10 | nDCG@10 | p50 latency | p95 latency |
-|---|---|---|---|---|---|---|---|
-| R0 | – | – | – | – | – | – | – |
-| R1 | – | – | – | – | – | – | – |
-| R2 | – | – | – | – | – | – | – |
-| R3 | – | – | – | – | – | – | – |
+| Config | Recall@1 | Recall@5 | Recall@10 | Hit@10 | MRR@10 | nDCG@10 | p50 latency | p95 latency |
+|---|---|---|---|---|---|---|---|---|
+| R0 BM25, syllables | 0.462 | 0.748 | 0.819 | 0.824 | 0.592 | 0.645 | 0.9 ms | 1.6 ms |
+| R1 BM25, words | 0.492 | 0.776 | 0.845 | 0.852 | 0.618 | 0.672 | 0.8 ms | 1.2 ms |
+| R2 Dense (bge-m3) | 0.558 | 0.830 | 0.884 | 0.890 | 0.680 | 0.727 | 193 ms | 223 ms |
+| **R3 Hybrid RRF (k = 10)** | 0.571 | 0.862 | **0.916** | **0.920** | 0.703 | 0.753 | 191 ms | 219 ms |
+| R4 R3 + reranker (N = 20) | **0.654** | **0.868** | 0.911 | 0.916 | **0.756** | **0.792** | 24.2 s* | 25.3 s* |
+
+\* R4 latency on a fixed 30-query CPU sample. On a Kaggle T4 GPU the reranker step takes 0.43 s per query. See *Deviations* in the [protocol](docs/EXPERIMENT_PROTOCOL.md).
+
+**Paired randomization tests** (two-sided, 10,000 permutations, Bonferroni over 5 planned comparisons, α = 0.01; [results/significance_test.csv](results/significance_test.csv)):
+
+| Comparison | Δ nDCG@10 | Δ Recall@10 |
+|---|---|---|
+| R1 vs R0 (word segmentation) | +0.026 ✔ | +0.026 ✔ |
+| R2 vs R1 (dense vs best lexical) | +0.056 ✔ | +0.039 ✔ |
+| R3 vs R1 | +0.082 ✔ | +0.070 ✔ |
+| R3 vs R2 (fusion vs dense) | +0.026 ✔ | +0.032 ✔ |
+| R4 vs R3 (reranking) | +0.039 ✔ | −0.005 ✘ (p = 0.34) |
+
+✔ significant at p < 0.0001 · ✘ not significant
+
+Dev and test agree closely (R3 nDCG@10: 0.751 dev vs 0.753 test), so the values tuned on dev did not overfit.
+
+### What the errors show
+
+From the [error analysis](results/error_analysis_findings.md) (segment breakdown + 71 hand-read questions):
+
+- **The two signals fail differently, which is why fusion works.** BM25 wins on exact rare terms, numbers and telling apart sibling articles (e.g. the *motorbike* vs *bicycle* fines articles). Dense wins on paraphrased, colloquial and short questions (≤ 12 syllables: Hit@10 0.853 vs 0.759).
+- **Long articles are the weak spot of every model.** 8% of test questions point to an article longer than bge-m3's 2,048-token window. On those, dense loses its advantage over BM25, and the 512-token reranker drops *below* the hybrid (nDCG@10 0.613 vs 0.681).
+- **The cost of fusion:** when BM25's rank-1 result is a lexical distractor, it can push dense's correct top-1 down to rank 2–3. The reranker repairs this ordering, which is why its gain is concentrated at Recall@1.
+- **Some remaining errors are label noise:** near-identical articles in different documents, and labels that only imply the answer. Absolute scores understate quality.
+
+### Answer generation check
+
+On 20 random test questions ([results/llm_sanity_check.md](results/llm_sanity_check.md)), Claude Haiku 5.5 over R3's top-5 cited the labelled article in 16/20 answers (it was retrieved in 17/20). When it was not retrieved, the model said so or limited itself to related provisions; it never invented a fine or a deadline. Cost: about $0.001 per answer.
 
 ## Demo
 
@@ -49,7 +81,9 @@ Recall@{1,5,10,20}, Hit@{1,5,10}, MRR@10, nDCG@10, and query latency (p50/p95, C
 
 - **No data leakage in the dense model.** `bkai-foundation-models/vietnamese-bi-encoder` was excluded because it was trained on 80% of the Zalo training set, which our test split is drawn from. `bge-m3` was chosen instead (long 8k-token context, no Zalo data in its published fine-tuning sets).
 - **Exact vector search.** With about 60k vectors, brute-force search takes milliseconds. Approximate indexes (HNSW, etc.) would mix index error into the model comparison.
-- **Tune on dev, report on test once.** This avoids optimistic, overfitted numbers.
+- **Tune on dev, report on test once.** This avoids optimistic, overfitted numbers. Selection rules were committed before tuning, and every deviation is logged in the protocol.
+- **Measured before committing to a plan.** A 5-query probe showed the reranker needs ~25 s per query on CPU, about 10× the initial estimate, so its scores were computed on a GPU and the change was logged as a protocol deviation before any result was seen.
+- **Cross-checks between machines.** Vectors encoded on a Kaggle GPU match local CPU encoding (cosine ≥ 0.9997), and GPU reranker scores reproduce the CPU ranking (Spearman 1.0). Offline fusion and the online retriever produce identical metrics.
 
 More: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
@@ -79,7 +113,7 @@ uv run python scripts/evaluate_rerank.py --tune    # choose n on dev; drop --tun
 uv run python app/app.py                           # Gradio demo at http://127.0.0.1:7860
 ```
 
-*Indexing and evaluation commands will be added as they are implemented.*
+The test split is guarded: `evaluate.py`, `export_rerank_candidates.py` and `evaluate_rerank.py` refuse `--split test` without `--allow-test`.
 
 ## Project structure
 
@@ -97,6 +131,8 @@ docs/             architecture and experiment protocol
 ## Limitations
 
 - Labels may be incomplete (relevant articles left unlabeled), which lowers absolute scores. Relative comparisons remain valid.
+- The RRF constant chosen on dev (`k = 10`) lies at the edge of the pre-registered grid; the grid was not extended after seeing results.
+- Answer generation sends at most 6,000 characters per article. In 1 of the 20 checked answers, the relevant clause sat beyond that cut, and the model said it could not find it (flagging the truncation itself).
 - The corpus is a 2021 snapshot and some laws have since changed. **The demo is not legal advice.**
 
 ## Data & license notes
