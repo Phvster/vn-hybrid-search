@@ -6,6 +6,7 @@ document vectors live in different spaces and the scores are silently meaningles
 """
 
 import json
+import os
 from pathlib import Path
 
 import faiss
@@ -40,7 +41,8 @@ def load_encoder(cfg: dict):
     import torch
     from sentence_transformers import SentenceTransformer
 
-    torch.set_num_threads(cfg["torch_threads"])  # fixed for comparable latency
+    # Fixed for comparable latency; TORCH_THREADS overrides it on smaller machines (the demo Space).
+    torch.set_num_threads(int(os.environ.get("TORCH_THREADS", cfg["torch_threads"])))
     encoder = SentenceTransformer(cfg["model"], revision=cfg["revision"], device="cpu")
     encoder.max_seq_length = cfg["max_seq_length"]
     return encoder

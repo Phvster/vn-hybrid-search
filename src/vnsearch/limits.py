@@ -4,7 +4,7 @@ import threading
 from datetime import UTC, date, datetime
 
 SESSION_LIMIT = 10
-DAILY_LIMIT = 300
+DAILY_LIMIT = 100  # worst case ≈ $0.3/day at ≤ $0.003 per answer
 
 
 class UsageLimiter:

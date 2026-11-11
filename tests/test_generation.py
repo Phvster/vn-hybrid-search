@@ -50,7 +50,7 @@ def test_request_uses_one_cited_document_per_article():
 
 
 def test_long_article_is_truncated_with_visible_note():
-    long_article = Article("x+1", "Điều 1.", "a" * 10_000)
+    long_article = Article("x+1", "Điều 1.", "a" * (generation.MAX_ARTICLE_CHARS + 1000))
     data = generation.document_block(long_article)["source"]["data"]
     assert len(data) == generation.MAX_ARTICLE_CHARS + len(generation.TRUNCATION_NOTE)
     assert data.endswith(generation.TRUNCATION_NOTE)

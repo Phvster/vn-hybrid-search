@@ -132,7 +132,7 @@ docs/             architecture and experiment protocol
 
 - Labels may be incomplete (relevant articles left unlabeled), which lowers absolute scores. Relative comparisons remain valid.
 - The RRF constant chosen on dev (`k = 10`) lies at the edge of the pre-registered grid; the grid was not extended after seeing results.
-- Answer generation sends at most 6,000 characters per article. In 1 of the 20 checked answers, the relevant clause sat beyond that cut, and the model said it could not find it (flagging the truncation itself).
+- Answer generation sends at most 20,000 characters per article. The sanity check first ran with a 6,000-character cap; in 1 of 20 answers the relevant clause sat beyond the cut, and the model said so instead of guessing. With the cap raised, that question is answered correctly with a citation. Longer articles are still truncated.
 - The corpus is a 2021 snapshot and some laws have since changed. **The demo is not legal advice.**
 
 ## Data & license notes

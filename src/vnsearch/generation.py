@@ -14,7 +14,9 @@ MAX_TOKENS = 2048
 EFFORT = "low"  # grounded Q&A over given text needs little reasoning
 TOP_K = 5  # articles passed to the model (R3 dev Recall@5 = 0.862)
 MAX_QUERY_CHARS = 500
-MAX_ARTICLE_CHARS = 6000  # some articles exceed 60k tokens; cap cost per request
+# Some articles exceed 60k tokens, so cost is capped per article. 6,000 characters cut off the
+# answer in 1 of 20 sanity-check questions (long fines articles); 20,000 keeps those clauses.
+MAX_ARTICLE_CHARS = 20_000
 TRUNCATION_NOTE = "\n[... nội dung đã được rút gọn ...]"
 # USD per million tokens (prompts up to 100K tokens).
 INPUT_PRICE_PER_MTOK = 0.10
