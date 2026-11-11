@@ -10,6 +10,8 @@ Manual reading of the seeded samples in [error_analysis_test.md](error_analysis_
 | BM25 is relatively stronger on questions with numbers / document codes | On the 193 questions with digits, BM25 nDCG@10 is above its average (R0 0.677 vs 0.645), dense is not (0.725 vs 0.727), and R3 gains most over R2 (Hit@10 0.938 vs 0.891). | **Confirmed.** |
 | Short questions favour dense (few terms for BM25 to match) | ≤ 12 syllables: R1 Hit@10 0.759 vs R2 0.853 (+9.4). > 20 syllables: 0.902 vs 0.916 (+1.4). | **Confirmed.** The dense advantage shrinks as questions get longer. |
 
+**R4 (reranker) has the same weakness, but worse.** The cross-encoder reads only 512 tokens shared between question and article. On the 178 long-answer questions, its nDCG@10 falls to **0.613, versus 0.681 for R3**, while it beats R3 in every other segment (e.g. short questions: 0.759 vs 0.686). The reranker sees only the start of long articles, so it confidently promotes shorter, more focused articles.
+
 Truncation matters more than the EDA suggested: 2% of *labelled articles* exceed 2,048 tokens, but 8% of *test questions* (178/2,237) point to one. Long articles, such as the traffic-fine articles of Decree 100/2019, are asked about far more often than short ones.
 
 ## 2. Why R3 beats R2 (30 sampled questions)
@@ -45,5 +47,5 @@ Most losses are small (the answer drops from rank 1 to 2–3), while many wins a
 
 1. **Fusion works because the two systems fail differently.** BM25 handles exact terms, numbers and sibling disambiguation. Dense handles paraphrase and short questions.
 2. **The main cost of `k = 10` is visible:** a strong lexical distractor at BM25 rank 1 can push dense's correct top-1 down one or two places. This is the precision loss that R4's reranker targets.
-3. **Long articles are the hardest case for every method.** Chunking (rejected in the EDA for simplicity) is the most promising next step for R2, since it is the configuration losing most there.
+3. **Long articles are the hardest case for every model-based method.** R2 (2,048 tokens) loses its edge there, and R4 (512 tokens) falls below R3. Chunking articles and scoring the best chunk (rejected in the EDA for simplicity) is the most promising next step for both.
 4. **Part of the remaining error is label noise** (near-duplicate articles across documents, indirect labels), so absolute scores understate quality. This matches the threat noted in the protocol.
