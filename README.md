@@ -111,6 +111,7 @@ uv run python scripts/tune_rrf.py                  # RRF k on dev (from saved ru
 uv run python scripts/export_rerank_candidates.py --split dev
 uv run python scripts/evaluate_rerank.py --tune    # choose n on dev; drop --tune to record
 uv run python app/app.py                           # Gradio demo at http://127.0.0.1:7860
+uv run python scripts/deploy.py                    # private artifacts repo + public HF Space
 ```
 
 The test split is guarded: `evaluate.py`, `export_rerank_candidates.py` and `evaluate_rerank.py` refuse `--split test` without `--allow-test`.

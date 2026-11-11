@@ -73,7 +73,8 @@ The FAISS `IndexFlatIP` is rebuilt from `embeddings.npy` at load time (under 1 s
 
 ## Demo (Hugging Face Spaces)
 
-- Corpus, indexes and embeddings (under ~500 MB) live in a **private HF dataset repo**. The Space downloads them at startup using an HF token stored in Space Secrets. The bge-m3 model is pulled from the Hub.
+- Corpus, indexes and embeddings (~290 MB) live in a **private HF dataset repo** (`vnsearch.hub.ARTIFACT_PATTERNS`). The public Space downloads them at startup with a **read-only** token stored as a Space secret. The write token never leaves the developer machine. The bge-m3 model is pulled from the Hub.
+- `scripts/deploy.py` uploads the artifacts, stages the Space (`deploy/space/` entry point, `src/vnsearch`, `configs/`, `app/app.py` as `demo.py`), sets secrets and variables (`TORCH_THREADS=2` for the 2-vCPU free tier), and uploads. `requirements.txt` pins the `uv.lock` versions and installs the CPU build of torch.
 - UI: a query box; R0–R3 top-5 results with per-config latency; a "Generate answer" button that retrieves with R3 and calls Claude Haiku, returning an answer with `[Law, Article]` citations and a legal disclaimer.
 - Cost protection: 500-character query limit, per-session and per-day generation caps, and a spend limit on the Anthropic Console.
 - Zalo questions and labels are **not** deployed to the Space.
