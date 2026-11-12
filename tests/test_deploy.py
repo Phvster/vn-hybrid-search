@@ -37,6 +37,16 @@ def test_artifact_patterns_cover_demo_and_exclude_labels():
     assert not any(matches(p) for p in FORBIDDEN)
 
 
+def test_artifact_files_lists_only_whitelisted_files(tmp_path):
+    for path in REQUIRED + FORBIDDEN + ["artifacts/bm25_word/model/data.csc.index.npy"]:
+        (tmp_path / path).parent.mkdir(parents=True, exist_ok=True)
+        (tmp_path / path).write_text("x")
+    files = hub.artifact_files(tmp_path)
+    assert set(REQUIRED) <= set(files)
+    assert "artifacts/bm25_word/model/data.csc.index.npy" in files
+    assert not set(FORBIDDEN) & set(files)
+
+
 def test_staged_space_contains_entry_point_and_package(tmp_path):
     deploy.stage_space(tmp_path)
     for name in (
