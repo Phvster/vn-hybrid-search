@@ -2,7 +2,7 @@
 
 **An empirical comparison of lexical, dense, and hybrid retrieval for Vietnamese legal text, packaged as the retrieval layer of a RAG system.**
 
-> Status: experiments complete (test split evaluated once). Public demo: 🚧 in progress.
+> Status: experiments complete (test split evaluated once). Demo: runs locally, video walkthrough coming soon.
 
 **TL;DR (held-out test, 2,237 questions):** Vietnamese word segmentation improves BM25 (+0.026 nDCG@10). Dense bge-m3 beats it (+0.056). **Hybrid RRF is best within a CPU budget: nDCG@10 0.753, Hit@10 0.920 at ~0.2 s/query.** A cross-encoder reranker pushes nDCG@10 to 0.792 (Recall@1 +8.3 points) but costs ~24 s/query on CPU. Every planned comparison is significant (p < 0.0001), except that the reranker does not change Recall@10.
 
@@ -75,7 +75,9 @@ On 20 random test questions ([results/llm_sanity_check.md](results/llm_sanity_ch
 
 ## Demo
 
-*Coming soon:* Hugging Face Space and video walkthrough. The demo shows the top results of R0–R3 side by side, then generates an answer with Claude Haiku that cites specific articles.
+*Video walkthrough: coming soon.* The demo shows the top results of R0–R3 side by side with per-configuration latency, then generates an answer with Claude Haiku that cites specific articles.
+
+The demo runs locally (`uv run python app/app.py`, or add `--share` for a temporary public link). It is not hosted permanently: Hugging Face now requires a paid plan for Gradio Spaces, and bge-m3 needs about 3 GB of RAM, more than other free tiers offer. The deployment path is ready if that changes: `scripts/deploy.py` uploads the artifacts to a private dataset repo and creates the Space, which downloads them at startup with a read-only token.
 
 ## Design decisions worth noting
 
@@ -110,8 +112,8 @@ uv run python scripts/tune_rrf.py                  # RRF k on dev (from saved ru
 #     put its output in artifacts/rerank/, then:
 uv run python scripts/export_rerank_candidates.py --split dev
 uv run python scripts/evaluate_rerank.py --tune    # choose n on dev; drop --tune to record
-uv run python app/app.py                           # Gradio demo at http://127.0.0.1:7860
-uv run python scripts/deploy.py                    # private artifacts repo + public HF Space
+uv run python app/app.py                           # Gradio demo at http://127.0.0.1:7860 (--share for a public link)
+uv run python scripts/deploy.py                    # private artifacts repo + HF Space (Space needs a paid HF plan)
 ```
 
 The test split is guarded: `evaluate.py`, `export_rerank_candidates.py` and `evaluate_rerank.py` refuse `--split test` without `--allow-test`.

@@ -73,6 +73,8 @@ The FAISS `IndexFlatIP` is rebuilt from `embeddings.npy` at load time (under 1 s
 
 ## Demo (Hugging Face Spaces)
 
+> **Status (2026-11-12):** the artifacts repo is uploaded, but the Space is not created. Hugging Face now requires a PRO subscription for Gradio Spaces on `cpu-basic` (HTTP 402). The demo runs locally (`app/app.py`, `--share` for a temporary public link) and is shown in a video. The path below stays ready for a paid plan.
+
 - Corpus, indexes and embeddings (~290 MB) live in a **private HF dataset repo** (`vnsearch.hub.ARTIFACT_PATTERNS`). The public Space downloads them at startup with a **read-only** token stored as a Space secret. The write token never leaves the developer machine. The bge-m3 model is pulled from the Hub.
 - `scripts/deploy.py` uploads the artifacts, stages the Space (`deploy/space/` entry point, `src/vnsearch`, `configs/`, `app/app.py` as `demo.py`), sets secrets and variables (`TORCH_THREADS=2` for the 2-vCPU free tier), and uploads. `requirements.txt` pins the `uv.lock` versions and installs the CPU build of torch.
 - UI: a query box; R0–R3 top-5 results with per-config latency; a "Generate answer" button that retrieves with R3 and calls Claude Haiku, returning an answer with `[Law, Article]` citations and a legal disclaimer.

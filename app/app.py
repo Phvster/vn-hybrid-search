@@ -1,8 +1,10 @@
 """Gradio demo: R0–R3 side by side, then a cited answer from Claude Haiku over R3's top-5.
 
-Run locally with `uv run python app/app.py` after building the artifacts.
+Run locally with `uv run python app/app.py` after building the artifacts
+(add `--share` for a temporary public link).
 """
 
+import argparse
 import os
 import time
 
@@ -160,10 +162,17 @@ def build_app(retrievers: dict[str, Retriever], corpus: pd.DataFrame) -> gr.Bloc
 
 
 def main() -> None:
+    parser = argparse.ArgumentParser(description="Gradio demo for R0–R3 + Claude Haiku answers")
+    parser.add_argument(
+        "--share",
+        action="store_true",
+        help="also open a temporary public gradio.live link (72 h); generation caps still apply",
+    )
+    args, _ = parser.parse_known_args()
     load_dotenv()
     corpus = data.load_corpus().set_index("doc_id")
     demo = build_app(load_retrievers(), corpus)
-    demo.queue(default_concurrency_limit=2).launch()
+    demo.queue(default_concurrency_limit=2).launch(share=args.share)
 
 
 if __name__ == "__main__":
