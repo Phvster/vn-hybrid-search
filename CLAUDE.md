@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-Vietnamese retrieval benchmark (BM25 syllable / BM25 word-segmented / dense bge-m3 / hybrid RRF) on Zalo AI 2021 Legal, with a Gradio + Claude Haiku RAG demo. Read [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) and [docs/EXPERIMENT_PROTOCOL.md](docs/EXPERIMENT_PROTOCOL.md) before changing retrieval or evaluation code.
+Vietnamese retrieval benchmark (BM25 syllable / BM25 word-segmented / dense bge-m3 / hybrid RRF) on Zalo AI 2021 Legal, with a web demo ("Hybrid Research": FastAPI + static HTML/CSS/JS in `app/`) and Claude Haiku answers. Read [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) and [docs/EXPERIMENT_PROTOCOL.md](docs/EXPERIMENT_PROTOCOL.md) before changing retrieval or evaluation code.
 
 ## Working agreement
 
@@ -12,7 +12,8 @@ Vietnamese retrieval benchmark (BM25 syllable / BM25 word-segmented / dense bge-
 
 ## Fixed decisions (do not re-propose alternatives without a new reason)
 
-- Stack: Python 3.11 + uv, pyvi, bm25s, bge-m3 via sentence-transformers, FAISS `IndexFlatIP`, ranx, pytest, ruff, Anthropic SDK with `claude-haiku-5-5`, Gradio on HF Spaces.
+- Stack: Python 3.11 + uv, pyvi, bm25s, bge-m3 via sentence-transformers, FAISS `IndexFlatIP`, ranx, pytest, ruff, Anthropic SDK with `claude-haiku-5-5`, FastAPI + plain HTML/CSS/JS demo (no front-end build step; Gradio was replaced 2026-11-17).
+- Demo UI: insert corpus and model text with `textContent` only (never `innerHTML`); no fake features: every control must call real code.
 - Not used: `bkai-foundation-models/vietnamese-bi-encoder` (trained on Zalo train data, which leaks into our test set), LangChain/LlamaIndex, vector DB servers, Elasticsearch.
 - Never tune on the test split. Tune on dev, run test once, and log any protocol change under *Deviations* in the experiment protocol.
 

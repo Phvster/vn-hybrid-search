@@ -23,7 +23,7 @@
                                                  ▼  list[Hit(doc_id, score)]
                      ┌───────────────────────────┼──────────────────────────┐
                      ▼                           ▼                          ▼
-             Evaluation harness           Latency benchmark           Gradio demo
+             Evaluation harness           Latency benchmark           Web demo (FastAPI)
            run files → ranx metrics      p50/p95, warm-up,        R0–R3 side by side
            + significance tests          fixed thread count       + Claude Haiku answer
 ```
@@ -73,11 +73,16 @@ The FAISS `IndexFlatIP` is rebuilt from `embeddings.npy` at load time (under 1 s
 
 ## Demo (Hugging Face Spaces)
 
-> **Status (2026-11-12):** the artifacts repo is uploaded, but the Space is not created. Hugging Face now requires a PRO subscription for Gradio Spaces on `cpu-basic` (HTTP 402). The demo runs locally (`app/app.py`, `--share` for a temporary public link) and is shown in a video. The path below stays ready for a paid plan.
+> **Status (2026-11-17):** the artifacts repo is uploaded, but the Space is not created. Hugging Face now requires a PRO subscription for non-static Spaces on `cpu-basic` (HTTP 402). The demo runs locally (`app/server.py`) and is shown in a video. The path below stays ready for a paid plan; the Space step is untested because the Space could not be created.
 
-- Corpus, indexes and embeddings (~290 MB) live in a **private HF dataset repo** (`vnsearch.hub.ARTIFACT_PATTERNS`). The public Space downloads them at startup with a **read-only** token stored as a Space secret. The write token never leaves the developer machine. The bge-m3 model is pulled from the Hub.
-- `scripts/deploy.py` uploads the artifacts, stages the Space (`deploy/space/` entry point, `src/vnsearch`, `configs/`, `app/app.py` as `demo.py`), sets secrets and variables (`TORCH_THREADS=2` for the 2-vCPU free tier), and uploads. `requirements.txt` pins the `uv.lock` versions and installs the CPU build of torch.
-- UI: a query box; R0–R3 top-5 results with per-config latency; a "Generate answer" button that retrieves with R3 and calls Claude Haiku, returning an answer with `[Law, Article]` citations and a legal disclaimer.
+- **Demo app ("Hybrid Research").** `app/server.py` is a FastAPI backend; `app/static/` is a plain HTML/CSS/JS front end (no build step, no framework). Gradio was replaced on 2026-11-17 because the UI needed a sidebar, a stage timeline and citation-to-source linking that Gradio's components could not express cleanly.
+  - `POST /api/search` runs R0, R1 and R2 and fuses R3 itself with `hybrid.rrf`, so each stage is timed separately and every R3 source carries its R1 and R2 rank. Results equal `HybridRetriever` (same function, same inputs).
+  - `POST /api/answer` takes the R3 doc_ids the UI is showing (validated against the corpus, at most `TOP_K`), so citation numbers match the source cards.
+  - `GET /api/metrics` serves `results/metrics_test.csv`; `GET /api/info` reports corpus size and whether generation is enabled.
+  - Model and corpus text are inserted with `textContent` only; a Content-Security-Policy allows scripts from the app's own origin only.
+  - Session history lives in the browser's `localStorage`. The per-session answer cap uses an HTTP-only cookie; the per-day cap is server-side.
+- Corpus, indexes and embeddings (~290 MB) live in a **private HF dataset repo** (`vnsearch.hub.ARTIFACT_PATTERNS`). The Space downloads them at startup with a **read-only** token stored as a Space secret. The write token never leaves the developer machine. The bge-m3 model is pulled from the Hub.
+- `scripts/deploy.py` uploads the artifacts (one file per commit, so a slow upload can resume), stages the Space (`deploy/space/` entry point, `src/vnsearch`, `configs/`, `app/server.py` as `demo.py`, `app/static/`, `results/metrics_test.csv`), sets secrets and variables (`TORCH_THREADS=2` for the 2-vCPU free tier), and uploads. `requirements.txt` pins the `uv.lock` versions and installs the CPU build of torch.
 - Cost protection: 500-character query limit, per-session and per-day generation caps, and a spend limit on the Anthropic Console.
 - Zalo questions and labels are **not** deployed to the Space.
 

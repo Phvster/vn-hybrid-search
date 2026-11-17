@@ -13,7 +13,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parent / "src"))
 from vnsearch.hub import download_artifacts  # noqa: E402
 
 download_artifacts(os.environ["ARTIFACTS_REPO"], token=os.environ.get("HF_TOKEN"))
+os.environ.setdefault("DEMO_HOST", "0.0.0.0")  # Spaces route external traffic to port 7860
 
-import demo  # noqa: E402  (app/app.py, copied by scripts/deploy.py)
+import demo  # noqa: E402  (app/server.py, copied by scripts/deploy.py)
 
 demo.main()

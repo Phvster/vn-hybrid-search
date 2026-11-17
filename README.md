@@ -75,9 +75,16 @@ On 20 random test questions ([results/llm_sanity_check.md](results/llm_sanity_ch
 
 ## Demo
 
-*Video walkthrough: coming soon.* The demo shows the top results of R0–R3 side by side with per-configuration latency, then generates an answer with Claude Haiku that cites specific articles.
+*Video walkthrough: coming soon.*
 
-The demo runs locally (`uv run python app/app.py`, or add `--share` for a temporary public link). It is not hosted permanently: Hugging Face now requires a paid plan for Gradio Spaces, and bge-m3 needs about 3 GB of RAM, more than other free tiers offer. The deployment path is ready if that changes: `scripts/deploy.py` uploads the artifacts to a private dataset repo and creates the Space, which downloads them at startup with a read-only token.
+**Hybrid Research** is a web UI (FastAPI + plain HTML/CSS/JS, no build step) over the same `vnsearch` code used in the experiments:
+
+- **Ask:** each question shows the retrieval pipeline with measured per-stage timings (BM25 → bge-m3 → RRF → Claude Haiku), the R3 top-5 sources with their **BM25 rank and dense rank** (so you can see why fusion picked them), and an answer whose citation chips jump to the quoted passage in the source article.
+- **Compare:** R0–R3 top-5 side by side; hovering an article highlights it in every configuration that found it.
+- **Benchmark:** the test-split metrics read from `results/metrics_test.csv`.
+- Session history stays in the browser; light/dark themes; responsive down to phone width; keyboard accessible.
+
+The demo runs locally: `uv run python app/server.py`, then open http://127.0.0.1:7860. It is not hosted permanently: Hugging Face now requires a paid plan for non-static Spaces, and bge-m3 needs about 3 GB of RAM, more than other free tiers offer. The deployment path is ready if that changes: `scripts/deploy.py` uploads the artifacts to a private dataset repo and creates the Space, which downloads them at startup with a read-only token.
 
 ## Design decisions worth noting
 
@@ -112,7 +119,7 @@ uv run python scripts/tune_rrf.py                  # RRF k on dev (from saved ru
 #     put its output in artifacts/rerank/, then:
 uv run python scripts/export_rerank_candidates.py --split dev
 uv run python scripts/evaluate_rerank.py --tune    # choose n on dev; drop --tune to record
-uv run python app/app.py                           # Gradio demo at http://127.0.0.1:7860 (--share for a public link)
+uv run python app/server.py                        # demo UI at http://127.0.0.1:7860
 uv run python scripts/deploy.py                    # private artifacts repo + HF Space (Space needs a paid HF plan)
 ```
 
@@ -126,7 +133,7 @@ src/vnsearch/     library code: data, text processing, retrievers, evaluation, g
 scripts/          CLI entry points
 notebooks/        Kaggle encoding, error analysis
 results/          EDA report and metric tables
-app/              Gradio demo
+app/              demo: FastAPI backend (server.py) + static web UI (static/)
 tests/            unit and integration tests
 docs/             architecture and experiment protocol
 ```

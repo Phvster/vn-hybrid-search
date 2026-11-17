@@ -1,10 +1,11 @@
 # Runtime dependencies of the demo Space, pinned to the versions in uv.lock.
-# gradio itself is installed by the Space from sdk_version in README.md.
+# The demo is a FastAPI app; the Space's own gradio install is unused.
 --extra-index-url https://download.pytorch.org/whl/cpu
 torch==2.15.0+cpu
 anthropic==2.5.0
 bm25s==0.3.16
 faiss-cpu==1.15.1
+fastapi==0.162.0
 huggingface-hub==2.4.0
 numpy==2.4.6
 pandas==3.1.1
@@ -15,3 +16,4 @@ pyyaml==6.0.3
 scikit-learn==1.9.1
 sentence-transformers==6.2.0
 transformers==5.22.1
+uvicorn==0.54.0

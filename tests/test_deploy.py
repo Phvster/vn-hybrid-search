@@ -56,6 +56,9 @@ def test_staged_space_contains_entry_point_and_package(tmp_path):
         "README.md",
         "configs/r3.yaml",
         "src/vnsearch/retrievers/hybrid.py",
+        "static/index.html",
+        "static/app.js",
+        "results/metrics_test.csv",
     ):
         assert (tmp_path / name).exists(), name
     assert not list(tmp_path.rglob("__pycache__"))

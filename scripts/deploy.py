@@ -1,4 +1,7 @@
-"""Deploy the demo: upload artifacts to a private dataset repo, then publish the Gradio Space.
+"""Deploy the demo: upload artifacts to a private dataset repo, then publish the Space.
+
+The Space runs the FastAPI demo (app/server.py) on port 7860. Hugging Face now requires a paid
+plan for non-static Spaces, so creating the Space fails with HTTP 402 on a free account.
 
 Reads from .env: HF_TOKEN (write; used here only), HF_READ_TOKEN (read-only; stored as the
 Space's HF_TOKEN secret) and ANTHROPIC_API_KEY (stored as a Space secret).
@@ -27,7 +30,12 @@ def stage_space(target: Path) -> None:
         ignore=shutil.ignore_patterns("__pycache__"),
     )
     shutil.copytree(PROJECT_ROOT / "configs", target / "configs")
-    shutil.copy(PROJECT_ROOT / "app" / "app.py", target / "demo.py")
+    shutil.copy(PROJECT_ROOT / "app" / "server.py", target / "demo.py")
+    shutil.copytree(PROJECT_ROOT / "app" / "static", target / "static")
+    (target / "results").mkdir()
+    shutil.copy(
+        PROJECT_ROOT / "results" / "metrics_test.csv", target / "results" / "metrics_test.csv"
+    )
     for name in ("app.py", "requirements.txt", "README.md"):
         shutil.copy(PROJECT_ROOT / "deploy" / "space" / name, target / name)
 

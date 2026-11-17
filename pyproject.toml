@@ -26,7 +26,8 @@ dev = [
     "ruff",
 ]
 app = [
-    "gradio",
+    "fastapi",
+    "uvicorn",
 ]
 
 [build-system]
