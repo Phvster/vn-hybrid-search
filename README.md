@@ -2,7 +2,7 @@
 
 **An empirical comparison of lexical, dense, and hybrid retrieval for Vietnamese legal text, packaged as the retrieval layer of a RAG system.**
 
-> Status: experiments complete (test split evaluated once). Demo: runs locally, video walkthrough coming soon.
+> Status: experiments complete (test split evaluated once). Demo: runs locally; [video walkthrough](https://www.youtube.com/watch?v=gwUhqeoF-d8).
 
 **TL;DR (held-out test, 2,237 questions):** Vietnamese word segmentation improves BM25 (+0.026 nDCG@10). Dense bge-m3 beats it (+0.056). **Hybrid RRF is best within a CPU budget: nDCG@10 0.753, Hit@10 0.920 at ~0.2 s/query.** A cross-encoder reranker pushes nDCG@10 to 0.792 (Recall@1 +8.3 points) but costs ~24 s/query on CPU. Every planned comparison is significant (p < 0.0001), except that the reranker does not change Recall@10.
 
@@ -75,7 +75,9 @@ On 20 random test questions ([results/llm_sanity_check.md](results/llm_sanity_ch
 
 ## Demo
 
-*Video walkthrough: coming soon.*
+[![Hybrid Research demo video](https://img.youtube.com/vi/gwUhqeoF-d8/hqdefault.jpg)](https://www.youtube.com/watch?v=gwUhqeoF-d8)
+
+*Video walkthrough (Vietnamese UI, on-screen captions): hybrid retrieval with citations, configuration comparison, an out-of-scope question, and the benchmark.*
 
 **Hybrid Research** is a web UI (FastAPI + plain HTML/CSS/JS, no build step) over the same `vnsearch` code used in the experiments:
 

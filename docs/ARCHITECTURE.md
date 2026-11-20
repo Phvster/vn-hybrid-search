@@ -73,7 +73,7 @@ The FAISS `IndexFlatIP` is rebuilt from `embeddings.npy` at load time (under 1 s
 
 ## Demo (Hugging Face Spaces)
 
-> **Status (2026-11-17):** the artifacts repo is uploaded, but the Space is not created. Hugging Face now requires a PRO subscription for non-static Spaces on `cpu-basic` (HTTP 402). The demo runs locally (`app/server.py`) and is shown in a video. The path below stays ready for a paid plan; the Space step is untested because the Space could not be created.
+> **Status (2026-11-17):** the artifacts repo is uploaded, but the Space is not created. Hugging Face now requires a PRO subscription for non-static Spaces on `cpu-basic` (HTTP 402). The demo runs locally (`app/server.py`) and is shown in a [video](https://www.youtube.com/watch?v=gwUhqeoF-d8). The path below stays ready for a paid plan; the Space step is untested because the Space could not be created.
 
 - **Demo app ("Hybrid Research").** `app/server.py` is a FastAPI backend; `app/static/` is a plain HTML/CSS/JS front end (no build step, no framework). Gradio was replaced on 2026-11-17 because the UI needed a sidebar, a stage timeline and citation-to-source linking that Gradio's components could not express cleanly.
   - `POST /api/search` runs R0, R1 and R2 and fuses R3 itself with `hybrid.rrf`, so each stage is timed separately and every R3 source carries its R1 and R2 rank. Results equal `HybridRetriever` (same function, same inputs).
